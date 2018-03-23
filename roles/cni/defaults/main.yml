@@ -1,0 +1,10 @@
+---
+
+flannel:
+  name: flannel
+  template:
+    ds: flannel.yml
+calico:
+  name: calico
+  template:
+    ds: calico.yml

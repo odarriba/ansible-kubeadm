@@ -1,0 +1,56 @@
+---
+
+- name: Reset Kubernetes component
+  shell: "kubeadm reset"
+  register: reset_cluster
+
+- name: Set full controller's domain list
+  when:
+    - controller_domains is not defined or controller_domains == ""
+  set_fact:
+    controller_domain_list: "kubernetes"
+
+- name: Set full controller's domain list
+  when:
+    - controller_domains is defined and controller_domains != ""
+  set_fact:
+    controller_domain_list: "kubernetes,{{ controller_domains }}"
+
+- name: Init Kubernetes cluster
+  when: reset_cluster|succeeded
+  shell: |
+    kubeadm init --service-cidr {{ service_cidr }} \
+                 --apiserver-advertise-address {{ ip }} \
+                 --kubernetes-version {{ kube_version }} \
+                 --pod-network-cidr {{ pod_network_cidr }} \
+                 --apiserver-cert-extra-sans "{{ controller_domain_list }}" \
+                 --token {{ token }} \
+                 {{ kubeadm_opts }} \
+                 {{ init_opts }}
+  register: init_cluster
+
+- name: Create Kubernetes config directory
+  file: path=/{{ ansible_user_id }}/.kube/ state=directory
+
+- name: copy config file to HOME/.kube dir
+  command: "{{ item }}"
+  with_items:
+    - mkdir -p ~{{ ansible_user }}/.kube
+    - cp /etc/kubernetes/admin.conf ~{{ ansible_user }}/.kube/config
+    - chown -R {{ ansible_user }}:{{ ansible_user }} ~{{ansible_user }}/.kube
+    - chmod 0400 ~{{ ansible_user }}/.kube/config
+
+- name: Enable and restart kubelet engine
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  register: started_kubelet
+
+- name: test kubectl get nodes
+  shell: KUBECONFIG=/etc/kubernetes/admin.conf kubectl get nodes
+  register: result_get_nodes
+
+- name: test kubectl get nodes result
+  shell: test {{ result_get_nodes.rc}} -eq 0
