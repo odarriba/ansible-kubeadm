@@ -12,6 +12,11 @@ Vagrant.configure("2") do |config|
     config.vm.define vm_name = "%s-%02d" % [$instance_name_prefix, i] do |config|
       config.vm.hostname = vm_name
 
+      config.vm.provider "virtualbox" do |v|
+        v.memory = 1536
+        v.cpus = 2
+      end
+
       ip = "#{$subnet}.#{i+100}"
       host_vars[vm_name] = {
         "ip": ip
