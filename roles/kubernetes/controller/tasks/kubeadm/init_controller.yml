@@ -4,31 +4,8 @@
   shell: "kubeadm reset"
   register: reset_cluster
 
-- name: "Create pki directory in all controllers"
-  file:
-    path: /etc/kubernetes/pki
-    state: directory
-
-- name: "Copy generated certificates to all controllers"
-  copy:
-    src: "secrets/pki/{{ item.file }}"
-    dest: "/etc/kubernetes/pki/{{ item.file }}"
-    owner: "root"
-    group: "root"
-    mode: "{{ item.mode }}"
-  with_items:
-  - file: ca.crt
-    mode: "0644"
-  - file: ca.key
-    mode: "0600"
-  - file: front-proxy-ca.crt
-    mode: "0644"
-  - file: front-proxy-ca.key
-    mode: "0600"
-  - file: sa.pub
-    mode: "0600"
-  - file: sa.key
-    mode: "0600"
+- name: Distribute PKI's CAs
+  include_tasks: ../pki/distribution.yml
 
 - name: Init Kubernetes cluster
   when: reset_cluster|succeeded

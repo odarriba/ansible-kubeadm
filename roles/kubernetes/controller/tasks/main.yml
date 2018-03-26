@@ -13,7 +13,7 @@
     controller_domains_list: "kubernetes,{{ controller_domains }}"
 
 - name: PKI infrastructure configuration
-  include_tasks: pki/main.yml
+  include_tasks: pki/fetch.yml
 
 - name: Initialise controllers
   include_tasks: kubeadm/init_controller.yml
