@@ -16,7 +16,7 @@
   include_tasks: pki/fetch.yml
 
 - name: Initialise controllers
-  include_tasks: kubeadm/init_controller.yml
+  include_tasks: kubeadm/main.yml
 
 - name: Create user configuration
   include_tasks: config/main.yml
