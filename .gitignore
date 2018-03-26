@@ -112,3 +112,5 @@ $RECYCLE.BIN/
 
 
 # End of https://www.gitignore.io/api/osx,linux,windows,ansible,vagrant,sublimetext,visualstudiocode
+
+secrets
