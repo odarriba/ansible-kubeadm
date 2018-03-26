@@ -1,4 +1,4 @@
-$num_instances = 3
+$num_instances = 4
 $instance_name_prefix = "kubernetes"
 $subnet = "172.17.8"
 

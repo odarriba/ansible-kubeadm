@@ -1,20 +1,25 @@
 ---
 
-- name: Reset Kubernetes component
-  shell: "kubeadm reset"
-  register: reset_cluster
-
 - name: Set full controller's domain list
   when:
     - controller_domains is not defined or controller_domains == ""
   set_fact:
-    controller_domain_list: "kubernetes"
+    controller_domains_list: "kubernetes"
 
 - name: Set full controller's domain list
   when:
     - controller_domains is defined and controller_domains != ""
   set_fact:
-    controller_domain_list: "kubernetes,{{ controller_domains }}"
+    controller_domains_list: "kubernetes,{{ controller_domains }}"
+
+- name: Manage certificates creation and deployment
+  include_tasks: certificates.yml
+  tags:
+      - certificates
+
+- name: Reset Kubernetes component
+  shell: "kubeadm reset"
+  register: reset_cluster
 
 - name: Init Kubernetes cluster
   when: reset_cluster|succeeded
@@ -23,7 +28,7 @@
                  --apiserver-advertise-address {{ ip }} \
                  --kubernetes-version {{ kube_version }} \
                  --pod-network-cidr {{ pod_network_cidr }} \
-                 --apiserver-cert-extra-sans "{{ controller_domain_list }}" \
+                 --apiserver-cert-extra-sans "{{ controller_domains_list }}" \
                  --token {{ token }} \
                  {{ kubeadm_opts }} \
                  {{ init_opts }}

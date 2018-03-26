@@ -2,6 +2,8 @@
 kube_version: v1.9.6
 token: b0f7b8.8d1767876297d85c
 
+generate_certs: true
+
 init_opts: ""
 controller_domains: ""
 kubeadm_opts: ''

@@ -1,7 +1,12 @@
 ---
+- name: Test if docker is installed
+  command: docker
+  register: docker_instaled
+  ignore_errors: True
 
 - name: Install Docker container engine
   include_tasks: pkg.yml
+  when: docker_instaled is not defined
 
 - name: Copy Docker engine service file
   register: change_docker
@@ -11,16 +16,18 @@
     owner: root
     group: root
     mode: 0755
+  when: docker_instaled is not defined
 
 - name: Copy Docker environment config file
   template: src=docker.j2 dest={{ system_env_dir }}/docker
+  when: docker_instaled is not defined
 
 - name: Add any insecure registrys to Docker config
-  when: insecure_registrys is defined and insecure_registrys > 0
+  when: docker_instaled is not defined and insecure_registrys is defined and insecure_registrys > 0
   lineinfile: dest={{ system_env_dir }}/docker regexp=^INSECURE_REGISTRY= line=INSECURE_REGISTRY="{% for reg in insecure_registrys %}--insecure-registry={{ reg }} {% endfor %}"
 
 - name: Add registry to Docker config
-  when: add_registry is defined and add_registry > 0
+  when: docker_instaled is not defined and add_registry is defined and add_registry > 0
   lineinfile: dest={{ system_env_dir }}/docker regexp=^ADD_REGISTRY= line=ADD_REGISTRY="{% for reg in add_registry %}--add-registry={{ reg }} {%endfor %}"
 
 - name: Enable and restart Docker engine
@@ -30,3 +37,4 @@
     state: restarted
     enabled: yes
   register: started_docker
+  when: docker_instaled is not defined

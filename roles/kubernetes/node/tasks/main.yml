@@ -4,11 +4,11 @@
   shell: "kubeadm reset"
   register: reset_cluster
 
-- name: Join to Kubernetes cluster
+- name: Join to Kubernetes cluster in {{ hostvars[groups['kube-controllers'][0]]['ip'] }}
   when: reset_cluster|succeeded
   shell: |
     kubeadm join --token {{ token }} \
-                 {{ groups['kube-controllers'][0] }}:6443 \
+                 {{ hostvars[groups['kube-controllers'][0]]['ip'] }}:6443 \
                  --discovery-token-unsafe-skip-ca-verification
   register: join_cluster
 
