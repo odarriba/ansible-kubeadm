@@ -1,0 +1,44 @@
+---
+
+- name: Check if local certificates exist
+  command: test -f secrets/pki/"{{ item }}"
+  with_items:
+   - ca.crt
+   - ca.key
+   - front-proxy-ca.crt
+   - front-proxy-ca.key
+   - sa.pub
+   - sa.key
+  become: false
+  run_once: true
+  ignore_errors: true
+  delegate_to: localhost
+  register: certs_exist
+
+- fail:
+    msg: "Certificates not found and generate_certs=false on the configuration!"
+  when: certs_exist|failed and (generate_certs == false or generate_certs is not defined)
+
+- name: "Generate certificates on a controller"
+  command: kubeadm alpha phase certs all
+  when: certs_exist|failed
+  run_once: true
+
+- name: "Fetch generated certificates"
+  fetch:
+    src: /etc/kubernetes/pki/{{ item }}
+    dest: secrets/pki/{{ item }}
+    flat: yes
+  with_items:
+   - ca.crt
+   - ca.key
+   - front-proxy-ca.crt
+   - front-proxy-ca.key
+   - sa.pub
+   - sa.key
+  run_once: true
+
+- name: "Remove previous pki dir"
+  file:
+    path: /etc/kubernetes/pki
+    state: absent
