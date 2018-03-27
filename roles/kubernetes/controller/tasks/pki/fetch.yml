@@ -18,7 +18,7 @@
 - name: "Trying to fetch certificates from {{ groups['kube-controllers'][0] }}"
   fetch:
     src: /etc/kubernetes/pki/{{ item }}
-    dest: secrets/kubernetes/{{ item }}
+    dest: secrets/kubernetes/pki/{{ item }}
     flat: yes
     fail_on_missing: true
   when: kubernetes_certs_exist|failed
@@ -33,7 +33,8 @@
   ignore_errors: true
   register: kubernetes_certs_fetched
 
-- fail:
+- name: "Fail if no certificates are found and generation is disabled"
+  fail:
     msg: "Certificates not found and kubernetes_generate_certs=false on the configuration!"
   when: kubernetes_certs_fetched|failed and kubernetes_certs_exist|failed and (kubernetes_generate_certs == false or kubernetes_generate_certs is not defined)
 

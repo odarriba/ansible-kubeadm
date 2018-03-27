@@ -2,7 +2,10 @@
 kube_version: v1.9.6
 token: b0f7b8.8d1767876297d85c
 
-# Should be kubernetes certificates be generated if not found in local or in first
+# Should etcd certificates be generated if not found in local or in first etcd node
+etcd_generate_certs: true
+
+# Should kubernetes certificates be generated if not found in local or in first controller
 kubernetes_generate_certs: true
 
 init_opts: ""

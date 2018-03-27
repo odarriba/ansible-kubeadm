@@ -27,7 +27,8 @@
   when: etcd_certs_exist|failed
   register: etcd_certs_fetched
 
-- fail:
+- name: "Fail if no certificate is found and generation is disabled"
+  fail:
     msg: "Etcd certificates not found and etcd_generate_certs=false on the configuration!"
   when: etcd_certs_fetched|failed and etcd_certs_exist|failed and (etcd_generate_certs == false or etcd_generate_certs is not defined)
 
