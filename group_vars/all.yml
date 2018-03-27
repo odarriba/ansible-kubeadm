@@ -5,6 +5,9 @@ token: b0f7b8.8d1767876297d85c
 # Should etcd certificates be generated if not found in local or in first etcd node
 etcd_generate_certs: true
 
+# Etcd version to install
+etcd_version: v3.3.2
+
 # Should kubernetes certificates be generated if not found in local or in first controller
 kubernetes_generate_certs: true
 

@@ -39,7 +39,7 @@ etcd:
   hosts :
     controller-0:
     controller-1:
-    worker-0:
+    worker-1:
 
 all:
   children:

@@ -2,6 +2,7 @@
   command: test -f secrets/etcd/"{{ item }}"
   with_items:
    - ca.pem
+   - ca-config.json
    - ca-key.pem
    - client.pem
    - client-key.pem
@@ -20,6 +21,7 @@
   with_items:
    - ca.pem
    - ca-key.pem
+   - ca-config.json
    - client.pem
    - client-key.pem
   run_once: true
@@ -36,18 +38,39 @@
   when: etcd_certs_fetched|failed and etcd_certs_exist|failed
   include_tasks: create.yml
 
-- name: "Fetch generated certificates from {{ groups['kube-controllers'][0] }}"
+- name: "Fetch generated certificates from {{ groups['etcd'][0] }}"
   fetch:
     src: /etc/etcd/pki/{{ item }}
     dest: secrets/etcd/{{ item }}
     flat: yes
     fail_on_missing: true
   with_items:
-   - ca.crt
-   - ca.key
-   - front-proxy-ca.crt
-   - front-proxy-ca.key
-   - sa.pub
-   - sa.key
+   - ca.pem
+   - ca-key.pem
+   - ca-config.json
+   - client.pem
+   - client-key.pem
   run_once: true
   when: etcd_certs_fetched|failed and etcd_certs_exist|failed
+
+- name: "Distribute certificates to all etcd nodes"
+  copy:
+    dest: /etc/etcd/pki/{{ item.file }}
+    src: secrets/etcd/{{ item.file }}
+    owner: "root"
+    group: "root"
+    mode: "{{ item.mode }}"
+  with_items:
+  - file: ca.pem
+    mode: "0644"
+  - file: ca-config.json
+    mode: "0644"
+  - file: ca-key.pem
+    mode: "0600"
+  - file: client.pem
+    mode: "0644"
+  - file: client-key.pem
+    mode: "0600"
+
+- name: "Generate peeer certificates"
+  include_tasks: peer_certs.yml

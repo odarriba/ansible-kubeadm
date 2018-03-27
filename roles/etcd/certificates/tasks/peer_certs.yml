@@ -1,0 +1,25 @@
+---
+- name: "Generate default configuration"
+  shell: cfssl print-defaults csr > /etc/etcd/pki/peer-config.json
+
+- name: "Apply host name"
+  replace:
+    path: /etc/etcd/pki/peer-config.json
+    regexp: '"example.net"'
+    replace: '"{{ inventory_hostname }}"'
+
+- name: "Apply IP address"
+  replace:
+    path: /etc/etcd/pki/peer-config.json
+    regexp: "\"www.example.net\""
+    replace: "\"{{ ip }}\", \"127.0.0.1\""
+
+- name: "Generate server certificate"
+  shell: "cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=server peer-config.json | cfssljson -bare server"
+  args:
+    chdir: /etc/etcd/pki
+
+- name: "Generate peer certificate"
+  shell: "cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=peer peer-config.json | cfssljson -bare peer"
+  args:
+    chdir: /etc/etcd/pki

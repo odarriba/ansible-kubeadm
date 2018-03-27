@@ -1,0 +1,28 @@
+- name: "Check if cfssl is installed on etcd nodes"
+  command: which cfssl
+  register: cfssl_installed
+  ignore_errors: true
+
+- name: "Install cfssl on etcd nodes"
+  get_url:
+    url:  https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+    dest: /usr/local/bin/cfssl
+    mode: 0755
+  when: cfssl_installed|failed
+
+- name: "Check if cfssljson is installed on etcd nodes"
+  command: which cfssljson
+  register: cfssljson_installed
+  ignore_errors: true
+
+- name: "Install cfssljson on etcd nodes"
+  get_url:
+    url:  https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+    dest: /usr/local/bin/cfssljson
+    mode: 0755
+  when: cfssljson_installed|failed
+
+- name: "Create etcd pki directory on etcd nodes"
+  file:
+    path: "/etc/etcd/pki"
+    state: directory
