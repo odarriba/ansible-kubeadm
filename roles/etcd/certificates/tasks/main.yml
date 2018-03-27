@@ -16,6 +16,7 @@
     src: /etc/etcd/pki/{{ item }}
     dest: secrets/etcd/{{ item }}
     flat: yes
+    fail_on_missing: true
   with_items:
    - ca.pem
    - ca-key.pem
@@ -39,6 +40,7 @@
     src: /etc/etcd/pki/{{ item }}
     dest: secrets/etcd/{{ item }}
     flat: yes
+    fail_on_missing: true
   with_items:
    - ca.crt
    - ca.key
