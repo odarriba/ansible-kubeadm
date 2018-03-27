@@ -1,11 +1,17 @@
 ---
 
-- hosts: kube-all
-  gather_facts: yes
+# - hosts: kube-all
+#   gather_facts: yes
+#   become: yes
+#   roles:
+#     - { role: docker, tags: docker }
+#     - { role: kubernetes/common, tags: common }
+
+- hosts: etcd
+  gather_facts: no
   become: yes
   roles:
-    - { role: docker, tags: docker }
-    - { role: kubernetes/common, tags: common }
+    - { role: etcd/certificates, tags: etcd_certificates }
 
 - hosts: kube-controllers
   gather_facts: yes

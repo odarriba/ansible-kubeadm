@@ -1,0 +1,50 @@
+- name: "Check if local certificates exist"
+  command: test -f secrets/etcd/"{{ item }}"
+  with_items:
+   - ca.pem
+   - ca-key.pem
+   - client.pem
+   - client-key.pem
+  become: false
+  run_once: true
+  ignore_errors: true
+  delegate_to: localhost
+  register: etcd_certs_exist
+
+- name: "Trying to fetch certificates from {{ groups['etcd'][0] }}"
+  fetch:
+    src: /etc/etcd/pki/{{ item }}
+    dest: secrets/etcd/{{ item }}
+    flat: yes
+  with_items:
+   - ca.pem
+   - ca-key.pem
+   - client.pem
+   - client-key.pem
+  run_once: true
+  ignore_errors: true
+  when: etcd_certs_exist|failed
+  register: etcd_certs_fetched
+
+- fail:
+    msg: "Etcd certificates not found and etcd_generate_certs=false on the configuration!"
+  when: etcd_certs_fetched|failed and etcd_certs_exist|failed and (etcd_generate_certs == false or etcd_generate_certs is not defined)
+
+- name: "Generate etcd certificates on {{ groups['etcd'][0] }}"
+  when: etcd_certs_fetched|failed and etcd_certs_exist|failed
+  include_tasks: create.yml
+
+- name: "Fetch generated certificates from {{ groups['kube-controllers'][0] }}"
+  fetch:
+    src: /etc/etcd/pki/{{ item }}
+    dest: secrets/etcd/{{ item }}
+    flat: yes
+  with_items:
+   - ca.crt
+   - ca.key
+   - front-proxy-ca.crt
+   - front-proxy-ca.key
+   - sa.pub
+   - sa.key
+  run_once: true
+  when: etcd_certs_fetched|failed and etcd_certs_exist|failed

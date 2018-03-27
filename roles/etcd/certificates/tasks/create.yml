@@ -1,0 +1,72 @@
+- name: "Check if cfssl is installed on {{ groups['etcd'][0] }}"
+  command: which cfssl
+  register: cfssl_installed
+  ignore_errors: true
+  run_once: true
+
+- name: "Install cfssl on {{ groups['etcd'][0] }}"
+  get_url:
+    url:  https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+    dest: /usr/local/bin/cfssl
+    mode: 0755
+  run_once: true
+  when: cfssl_installed|failed
+
+- name: "Check if cfssljson is installed on {{ groups['etcd'][0] }}"
+  command: which cfssljson
+  register: cfssljson_installed
+  ignore_errors: true
+  run_once: true
+
+- name: "Install cfssljson on {{ groups['etcd'][0] }}"
+  get_url:
+    url:  https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+    dest: /usr/local/bin/cfssljson
+    mode: 0755
+  run_once: true
+  when: cfssljson_installed|failed
+
+- name: "Create etcd pki dir on {{ groups['etcd'][0] }}"
+  file:
+    path: "/etc/etcd/pki"
+    state: directory
+  run_once: true
+
+- name: "Create etcd ca-config json file on {{ groups['etcd'][0] }}"
+  template:
+    src: ../templates/ca-config.json.j2
+    dest: /etc/etcd/pki/ca-config.json
+    owner: root
+    group: root
+    mode: 0644
+  run_once: true
+
+- name: "Create etcd ca-csr json file on {{ groups['etcd'][0] }}"
+  template:
+    src: ../templates/ca-csr.json.j2
+    dest: /etc/etcd/pki/ca-csr.json
+    owner: root
+    group: root
+    mode: 0644
+  run_once: true
+
+- name: "Generate etcd CA certificate on {{ groups['etcd'][0] }}"
+  shell: cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
+  args:
+    chdir: /etc/etcd/pki
+  run_once: true
+
+- name: "Create etcd client json file on {{ groups['etcd'][0] }}"
+  template:
+    src: ../templates/client.json.j2
+    dest: /etc/etcd/pki/client.json
+    owner: root
+    group: root
+    mode: 0644
+  run_once: true
+
+- name: "Generate etcd client certificate on {{ groups['etcd'][0] }}"
+  shell: cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=client client.json | cfssljson -bare client
+  args:
+    chdir: /etc/etcd/pki
+  run_once: true
