@@ -1,7 +1,7 @@
 ---
 
 - name: Check if local certificates exist
-  command: test -f secrets/pki/"{{ item }}"
+  command: test -f secrets/kubernetes/pki/"{{ item }}"
   with_items:
    - ca.crt
    - ca.key
@@ -13,22 +13,14 @@
   run_once: true
   ignore_errors: true
   delegate_to: localhost
-  register: certs_exist
+  register: kubernetes_certs_exist
 
-- fail:
-    msg: "Certificates not found and generate_certs=false on the configuration!"
-  when: certs_exist|failed and (generate_certs == false or generate_certs is not defined)
-
-- name: "Generate certificates on a controller"
-  command: kubeadm alpha phase certs all
-  when: certs_exist|failed
-  run_once: true
-
-- name: "Fetch generated certificates"
+- name: "Trying to fetch certificates from {{ gropus['kube-controllers'][0] }}"
   fetch:
     src: /etc/kubernetes/pki/{{ item }}
-    dest: secrets/pki/{{ item }}
+    dest: secrets/kubernetes/pki/{{ item }}
     flat: yes
+  when: kubernetes_certs_exist|failed
   with_items:
    - ca.crt
    - ca.key
@@ -37,8 +29,29 @@
    - sa.pub
    - sa.key
   run_once: true
+  ignore_errors: true
+  register: kubernetes_certs_fetched
 
-- name: "Remove previous pki dir"
-  file:
-    path: /etc/kubernetes/pki
-    state: absent
+- fail:
+    msg: "Certificates not found and kubernetes_generate_certs=false on the configuration!"
+  when: kubernetes_certs_fetched|failed and kubernetes_certs_exist|failed and (kubernetes_generate_certs == false or kubernetes_generate_certs is not defined)
+
+- name: "Generate certificates on {{ gropus['kube-controllers'][0] }}"
+  command: kubeadm alpha phase certs all
+  when: kubernetes_certs_fetched|failed and kubernetes_certs_exist|failed
+  run_once: true
+
+- name: "Fetch generated certificates from {{ gropus['kube-controllers'][0] }}"
+  fetch:
+    src: /etc/kubernetes/pki/{{ item }}
+    dest: secrets/kubernetes/pki/{{ item }}
+    flat: yes
+  when: kubernetes_certs_fetched|failed and kubernetes_certs_exist|failed
+  with_items:
+   - ca.crt
+   - ca.key
+   - front-proxy-ca.crt
+   - front-proxy-ca.key
+   - sa.pub
+   - sa.key
+  run_once: true
