@@ -13,7 +13,17 @@
 
 - include_tasks: set_cluster_health.yml
 
-- include_tasks: configure_members.yml
+- name: Join member(s) to etcd cluster one at a time
+  include_tasks: join_members.yml
+  when: etcd_cluster_is_healthy.rc == 0
+  vars:
+    target_node: "{{ item }}"
+  loop_control:
+    pause: 10
+  with_items: "{{ groups['etcd'] }}"
+
+- name: Create cluster
+  include_tasks: create_cluster.yml
 
 - name: Ensure all members are in etcd cluster
   shell: "etcdctl --no-sync member list | grep -q {{ etcd_access_url }}"

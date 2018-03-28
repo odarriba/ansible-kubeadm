@@ -1,9 +1,0 @@
----
-
-- name: Join member(s) to etcd cluster one at a time
-  include_tasks: join_member.yml
-  vars:
-    target_node: "{{ item }}"
-  loop_control:
-    pause: 10
-  with_items: "{{ groups['etcd'] }}"

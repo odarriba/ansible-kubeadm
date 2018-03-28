@@ -2,13 +2,13 @@
 - name: "Generate default configuration"
   shell: cfssl print-defaults csr > /etc/etcd/pki/peer-config.json
 
-- name: "Apply host name"
+- name: "Apply host name to peer cert"
   replace:
     path: /etc/etcd/pki/peer-config.json
     regexp: '"example.net"'
     replace: '"{{ inventory_hostname }}"'
 
-- name: "Apply IP address"
+- name: "Apply IP address to peer cert"
   replace:
     path: /etc/etcd/pki/peer-config.json
     regexp: "\"www.example.net\""

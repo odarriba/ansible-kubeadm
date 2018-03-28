@@ -1,0 +1,42 @@
+- name: "Set ectd cluster addresses"
+  set_fact:
+    etcd_peer_urls: >-
+      {% for host in groups['etcd'] -%}
+        {{ host }}=https://{{ hostvars[host]['ip'] }}:2380{%- if not loop.last -%},{%- endif -%}
+      {%- endfor -%}
+
+- name: "Create/update etcd.env"
+  template:
+    src: ../templates/etcd.env.j2
+    dest: /etc/etcd.env
+    owner: root
+    group: root
+    mode: 0644
+
+- name: "Create/update etcd.service"
+  template:
+    src: ../templates/etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: "Reload systemd"
+  command: systemctl daemon-reload
+
+- name: "Ensure etcd is running"
+  service:
+    name: etcd
+    state: started
+    enabled: yes
+
+- name: "Check that all nodes are in etcd cluster"
+  shell: "etcdctl --no-sync member list | grep -q {{ etcd_access_url }}"
+  register: etcd_member_in_cluster
+  changed_when: false
+  check_mode: no
+  environment:
+    ETCDCTL_ENDPOINTS: "{{ etcd_access_urls }}"
+    ETCDCTL_CA_FILE: "/etc/etcd/pki/ca.pem"
+    ETCDCTL_CERT_FILE: "/etc/etcd/pki/client.pem"
+    ETCDCTL_KEY_FILE: "/etc/etcd/pki/client-key.pem"
