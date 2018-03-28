@@ -10,6 +10,9 @@ service
 During all operations a backup is made in prevention of disasters. Thos backups
 can be found on `/var/lib/etcd/backup`.
 
+Etcd-only tasks can be run using `etcd.yml` playbook, but take in mind that it
+won't upgrade the etcd addresses in Kubernetes!
+
 ## Scale the cluster up
 
 The cluster can be scaled by just adding the new nodes on the `etcd` group and

@@ -1,0 +1,9 @@
+---
+
+- hosts: etcd
+  gather_facts: no
+  become: yes
+  roles:
+    - { role: etcd/common, tags: etcd_common }
+    - { role: etcd/certificates, tags: etcd_certificates }
+    - { role: etcd/install, tags: etcd_install }
