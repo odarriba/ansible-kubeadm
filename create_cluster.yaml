@@ -1,32 +1,31 @@
 ---
 
-# - hosts: kube-all
-#   gather_facts: yes
-#   become: yes
-#   roles:
-#     - { role: docker, tags: docker }
-#     - { role: kubernetes/common, tags: common }
+- hosts: kube-all
+  gather_facts: yes
+  become: yes
+  roles:
+    - { role: docker, tags: docker }
+    - { role: kubernetes/common, tags: common }
 
 - hosts: etcd
   gather_facts: no
   become: yes
   roles:
-    - { role: base, tags: base }
     - { role: etcd/common, tags: etcd_common }
     - { role: etcd/certificates, tags: etcd_certificates }
     - { role: etcd/install, tags: etcd_install }
 
-# - hosts: kube-controllers
-#   gather_facts: yes
-#   become: yes
-#   roles:
-#     - { role: kubernetes/controller, tags: controller }
-#     - { role: cni, tags: cni }
-#     # - { role: addon, tags: addon }
+- hosts: kube-controllers
+  gather_facts: yes
+  become: yes
+  roles:
+    - { role: kubernetes/controller, tags: controller }
+    - { role: cni, tags: cni }
+    # - { role: addon, tags: addon }
 
-# - hosts: kube-nodes
-#   gather_facts: yes
-#   become: yes
-#   roles:
-#     - { role: kubernetes/node, tags: node }
+- hosts: kube-nodes
+  gather_facts: yes
+  become: yes
+  roles:
+    - { role: kubernetes/node, tags: node }
 
