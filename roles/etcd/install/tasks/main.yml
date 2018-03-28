@@ -2,61 +2,30 @@
 
 - name: "Set ectd cluster addresses"
   set_fact:
-    etcd_access_addresses: |-
+    etcd_access_url: "https://{{ ip }}:2379"
+    etcd_peer_url: "https://{{ ip }}:2380"
+    etcd_access_urls: |-
       {% for item in groups['etcd'] -%}
         https://{{ hostvars[item]['ip'] }}:2379{% if not loop.last %},{% endif %}
       {%- endfor %}
-    etcd_peer_url: https://{{ ip }}:2379
 
-- name: Install etcd
-  unarchive:
-    src: https://github.com/coreos/etcd/releases/download/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-amd64.tar.gz
-    dest: /usr/local/bin
-    extra_opts: [--strip-components=1]
-    remote_src: yes
+- include_tasks: install.yml
 
-- name: "Check if cluster already exists"
-  shell: "etcdctl cluster-health | grep -q 'cluster is healthy'"
-  register: etcd_cluster_is_healthy
-  ignore_errors: true
+- include_tasks: set_cluster_health.yml
+
+- include_tasks: configure_members.yml
+
+- name: Ensure all members are in etcd cluster
+  shell: "etcdctl --no-sync member list | grep -q {{ etcd_access_url }}"
+  register: etcd_member_in_cluster
   changed_when: false
   check_mode: no
-  environment:
-    ETCDCTL_ENDPOINTS: "https://127.0.0.1:2379"
-    ETCDCTL_CA_FILE: "/etc/etcd/pki/ca.pem"
-    ETCDCTL_CERT_FILE: "/etc/etcd/pki/client.pem"
-    ETCDCTL_KEY_FILE: "/etc/etcd/pki/client-key.pem"
-
-- name: "Create etcd.env"
-  template:
-    src: ../templates/etcd.env.j2
-    dest: /etc/etcd.env
-    owner: root
-    group: root
-    mode: 0644
-
-- name: "Create etcd.service"
-  template:
-    src: ../templates/etcd.service.j2
-    dest: /etc/systemd/system/etcd.service
-    owner: root
-    group: root
-    mode: 0644
-
-- name: "Join etcd cluster"
-  when: etcd_cluster_is_healthy.rc == 0
-  shell: "etcdctl member add {{ inventory_hostname }} {{ etcd_peer_url }}"
-  register: member_add_result
-  until: member_add_result.rc == 0
+  until: etcd_member_in_cluster.rc == 0
   retries: 4
   environment:
-    ETCDCTL_ENDPOINTS: "{{ etcd_access_addresses }}"
+    ETCDCTL_ENDPOINTS: "{{ etcd_access_url }}"
     ETCDCTL_CA_FILE: "/etc/etcd/pki/ca.pem"
     ETCDCTL_CERT_FILE: "/etc/etcd/pki/client.pem"
     ETCDCTL_KEY_FILE: "/etc/etcd/pki/client-key.pem"
 
-- name: "Reload systemd and restart etcd"
-  systemd:
-    daemon_reload: yes
-    name: "etcd.service"
-    state: "restarted"
+- include_tasks: refresh_configuration.yml

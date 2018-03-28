@@ -37,9 +37,9 @@ kube-all:
 
 etcd:
   hosts :
-    controller-0:
-    controller-1:
     worker-1:
+    controller-1:
+    controller-0:
 
 all:
   children:

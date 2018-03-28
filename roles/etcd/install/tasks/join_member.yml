@@ -1,0 +1,66 @@
+- name: Check which nodes are etcd members
+  shell: "etcdctl --no-sync member list | grep -q {{ etcd_access_url }}"
+  register: etcd_member_in_cluster
+  ignore_errors: true
+  changed_when: false
+  check_mode: no
+  environment:
+    ETCDCTL_ENDPOINTS: "{{ etcd_access_urls }}"
+    ETCDCTL_CA_FILE: "/etc/etcd/pki/ca.pem"
+    ETCDCTL_CERT_FILE: "/etc/etcd/pki/client.pem"
+    ETCDCTL_KEY_FILE: "/etc/etcd/pki/client-key.pem"
+
+- name: "{{ target_node }} | Set ectd cluster addresses"
+  set_fact:
+    etcd_peer_urls: >-
+      {% for host in groups['etcd'] -%}
+        {%- if hostvars[host]['etcd_member_in_cluster'].rc == 0 -%}
+          {{ "etcd"+loop.index|string }}=https://{{ hostvars[host]['ip'] }}:2380,
+        {%- endif -%}
+        {%- if loop.last -%}
+          {{ inventory_hostname }}={{ etcd_peer_url }}
+        {%- endif -%}
+      {%- endfor -%}
+  when: target_node == inventory_hostname
+
+- name: "{{ target_node }} | Create/update etcd.env"
+  template:
+    src: ../templates/etcd.env.j2
+    dest: /etc/etcd.env
+    owner: root
+    group: root
+    mode: 0644
+  when: target_node == inventory_hostname
+
+- name: "{{ target_node }} | Create/update etcd.service"
+  template:
+    src: ../templates/etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+    owner: root
+    group: root
+    mode: 0644
+  when: target_node == inventory_hostname
+  notify: restart etcd
+
+- name: "{{ target_node }} | Join etcd cluster"
+  when: target_node == inventory_hostname and etcd_cluster_is_healthy.rc == 0 and etcd_member_in_cluster.rc != 0
+  shell: "etcdctl member add {{ inventory_hostname }} {{ etcd_peer_url }}"
+  register: member_add_result
+  until: member_add_result.rc == 0
+  retries: 4
+  environment:
+    ETCDCTL_ENDPOINTS: "{{ etcd_access_urls }}"
+    ETCDCTL_CA_FILE: "/etc/etcd/pki/ca.pem"
+    ETCDCTL_CERT_FILE: "/etc/etcd/pki/client.pem"
+    ETCDCTL_KEY_FILE: "/etc/etcd/pki/client-key.pem"
+
+- name: "{{ target_node }} | Reload systemd"
+  command: systemctl daemon-reload
+  when: target_node == inventory_hostname
+
+- name: "{{ target_node }} | Ensure etcd is running"
+  when: target_node == inventory_hostname
+  service:
+    name: etcd
+    state: started
+    enabled: yes

@@ -26,7 +26,7 @@ ExecStart=/usr/local/bin/etcd --name ${PEER_NAME} \
     --peer-key-file=/etc/etcd/pki/peer-key.pem \
     --peer-client-cert-auth \
     --peer-trusted-ca-file=/etc/etcd/pki/ca.pem \
-    --initial-cluster {% for host in groups['etcd'] %}{{ host }}=https://{{ hostvars[host]['ip']}}:2380{% if not loop.last %},{% endif %}{% endfor %} \
+    --initial-cluster {{ etcd_peer_urls }} \
     --initial-cluster-token my-etcd-token \
     --initial-cluster-state {% if etcd_cluster_is_healthy.rc != 0 | bool %}new{% else %}existing{% endif %}
 

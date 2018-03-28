@@ -1,0 +1,9 @@
+---
+- name: Add entries to hosts files
+  lineinfile:
+    dest: /etc/hosts
+    regexp: "{{ hostvars[item].ip }} {{item}}"
+    line: "{{ hostvars[item].ip }} {{item}}"
+    insertafter: EOF
+    state: present
+  with_items: "{{ groups['etcd'] }}"

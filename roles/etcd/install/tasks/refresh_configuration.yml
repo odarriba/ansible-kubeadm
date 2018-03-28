@@ -1,0 +1,22 @@
+---
+
+- name: "Set ectd cluster addresses"
+  set_fact:
+    etcd_peer_urls: >-
+      {% for host in groups['etcd'] -%}
+        {%- if hostvars[host]['etcd_member_in_cluster'].rc == 0 -%}
+          {{ "etcd"+loop.index|string }}=https://{{ hostvars[host]['ip'] }}:2380,
+        {%- endif -%}
+        {%- if loop.last -%}
+          {{ inventory_hostname }}={{ etcd_peer_url }}
+        {%- endif -%}
+      {%- endfor -%}
+
+- name: "Refresh etcd.service"
+  template:
+    src: ../templates/etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart etcd
