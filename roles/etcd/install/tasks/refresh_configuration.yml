@@ -5,12 +5,11 @@
     etcd_peer_urls: >-
       {% for host in groups['etcd'] -%}
         {%- if hostvars[host]['etcd_member_in_cluster'].rc == 0 -%}
-          {{ "etcd"+loop.index|string }}=https://{{ hostvars[host]['ip'] }}:2380,
-        {%- endif -%}
-        {%- if loop.last -%}
-          {{ inventory_hostname }}={{ etcd_peer_url }}
+          {{ host }}=https://{{ hostvars[host]['ip'] }}:2380{% if not loop.last %},{% endif %}
         {%- endif -%}
       {%- endfor -%}
+    etcd_cluster_is_healthy:
+      rc: 0
 
 - name: "Refresh etcd.service"
   template:
