@@ -2,7 +2,7 @@ apiVersion: kubeadm.k8s.io/v1alpha1
 kind: MasterConfiguration
 api:
   advertiseAddress: {{ ip }}
-  bindPort: 443
+  bindPort: 6443
 etcd:
   endpoints:
 {% for host in groups['etcd'] %}

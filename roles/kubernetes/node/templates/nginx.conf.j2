@@ -12,7 +12,7 @@ stream {
         upstream kube_apiserver {
             least_conn;
             {% for host in groups['kube-controllers'] -%}
-            server {{ hostvars[host]['ip'] }}:443;
+            server {{ hostvars[host]['ip'] }}:6443;
             {% endfor %}
         }
 
