@@ -1,11 +1,9 @@
 ---
 
-- include_tasks: get_kubeadm_token.yml
+- include_tasks: get_kubeadm_credentials.yml
 
 - name: Reset Kubernetes component
   shell: "kubeadm reset"
   register: reset_cluster
-
-- include_tasks: ../../pki/distribution_nodes.yml
 
 - include_tasks: join_cluster.yml

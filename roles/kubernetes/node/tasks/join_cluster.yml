@@ -1,9 +1,10 @@
 ---
 
 - name: Join to Kubernetes cluster in {{ hostvars[groups['kube-controllers'][0]]['ip'] }}
-  when: get_kubeadm_token.rc == 0
+  when: get_kubeadm_token.rc == 0 and get_kubeadm_ca_hash.rc == 0
   shell: |
     kubeadm join --token {{ get_kubeadm_token.stdout }} \
+                 --discovery-token-ca-cert-hash sha256:{{ get_kubeadm_ca_hash.stdout }} \
                  {{ hostvars[groups['kube-controllers'][0]]['ip'] }}:6443
   register: join_cluster
 
