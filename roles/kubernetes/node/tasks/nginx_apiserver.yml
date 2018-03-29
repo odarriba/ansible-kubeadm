@@ -1,0 +1,48 @@
+---
+- name: nginx-proxy | Make nginx directory
+  file:
+    path: /etc/nginx
+    state: directory
+    mode: 0700
+    owner: root
+
+- name: nginx-proxy | Write nginx-proxy configuration
+  template:
+    src: nginx.conf.j2
+    dest: "/etc/nginx/nginx.conf"
+    owner: root
+    mode: 0755
+    backup: yes
+
+- name: nginx-proxy | Write static pod
+  template:
+    src: manifests/nginx-proxy.manifest.j2
+    dest: "/etc/kubernetes/manifests/nginx-proxy.yml"
+
+- name: Restart all nginx proxies to fetch updated configuration
+  command: kubectl delete pod -n kube-system -l k8s-app=kube-nginx-apiserver
+  run_once: true
+  delegate_to: "{{ groups['kube-controllers'][0] }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Update kubelet.conf to point to reverse proxy
+  replace:
+    path: /etc/kubernetes/kubelet.conf
+    regexp: 'server:.*:443'
+    replace: 'server: https://127.0.0.1:6443'
+
+- name: Restart kubelet engine
+  systemd:
+    name: kubelet
+    state: restarted
+    enabled: yes
+
+- name: Test kubectl continues working
+  shell: kubectl get nodes
+  register: result_get_nodes
+  until: result_get_nodes.rc == 0
+  environment:
+    KUBECONFIG: "/etc/kubernetes/kubelet.conf"
+  retries: 5
+  delay: 10

@@ -1,0 +1,11 @@
+---
+use_nginx_loadbalancer: true
+
+# NGiNX internal load balancer
+nginx_memory_limit: 512M
+nginx_cpu_limit: 300m
+nginx_memory_requests: 32M
+nginx_cpu_requests: 25m
+
+nginx_image_repo: nginx
+nginx_image_tag: 1.13

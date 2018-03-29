@@ -2,7 +2,7 @@
 
 - name: Create kubeadm-config.json
   template:
-    src: ../templates/kubeadm-config.json.j2
+    src: kubeadm-config.json.j2
     dest: /etc/kubernetes/kubeadm-config.json
     owner: root
     group: root

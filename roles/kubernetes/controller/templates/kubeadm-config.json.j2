@@ -2,6 +2,7 @@ apiVersion: kubeadm.k8s.io/v1alpha1
 kind: MasterConfiguration
 api:
   advertiseAddress: {{ ip }}
+  bindPort: 443
 etcd:
   endpoints:
 {% for host in groups['etcd'] %}
@@ -14,6 +15,8 @@ networking:
   podSubnet: {{ pod_network_cidr }}
 apiServerCertSANs:
 - kubernetes
+- 127.0.0.1
+- cluster.local
 {% for domain in controller_domains -%}
 - {{ domain }}
 {% endfor %}

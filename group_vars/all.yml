@@ -11,6 +11,15 @@ etcd_version: v3.3.2
 # Should kubernetes certificates be generated if not found in local or in first controller
 kubernetes_generate_certs: true
 
+# An NGiNX load balancer will be spinned up on each node to be able to load
+# balance the calls to the API servers (only if there are more than one
+# controller)
+use_nginx_loadbalancer: true
+
+# This variables can set which NGiNX image/version to use
+nginx_image_repo: nginx
+nginx_image_tag: 1.13
+
 init_opts: ""
 controller_domains: []
 kubeadm_opts: ''
