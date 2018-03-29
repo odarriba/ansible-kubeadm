@@ -7,3 +7,5 @@
   register: reset_cluster
 
 - include_tasks: join_cluster.yml
+
+- include_tasks: node_labels.yml

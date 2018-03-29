@@ -1,0 +1,12 @@
+---
+
+- name: Label nodes as nodes
+  command: kubectl label node {{ ansible_hostname }} node-role.kubernetes.io/node=
+  environment:
+    KUBECONFIG: "/etc/kubernetes/kubelet.conf"
+
+- name: Label nodes with their custom labels
+  command: kubectl label node {{ ansible_hostname }} {{ item }}
+  environment:
+    KUBECONFIG: "/etc/kubernetes/kubelet.conf"
+  with_items: "{{ custom_labels }}"
