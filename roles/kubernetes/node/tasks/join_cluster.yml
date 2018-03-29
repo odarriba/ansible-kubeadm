@@ -5,7 +5,6 @@
   shell: |
     kubeadm join --token {{ get_kubeadm_token.stdout }} \
                  --discovery-token-ca-cert-hash sha256:{{ get_kubeadm_ca_hash.stdout }} \
-                 --node-name {{ inventory_hostname }} \
                  {{ hostvars[groups['kube-controllers'][0]]['ip'] }}:6443
   register: join_cluster
 
@@ -18,12 +17,12 @@
   register: started_kubelet
 
 - name: Label nodes as nodes
-  command: kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/node=
+  command: kubectl label node {{ ansible_hostname }} node-role.kubernetes.io/node=
   environment:
     KUBECONFIG: "/etc/kubernetes/kubelet.conf"
 
 - name: Label nodes with their custom labels
-  command: kubectl label node {{ inventory_hostname }} {{ item }}
+  command: kubectl label node {{ ansible_hostname }} {{ item }}
   environment:
     KUBECONFIG: "/etc/kubernetes/kubelet.conf"
   with_items: "{{ custom_labels }}"
