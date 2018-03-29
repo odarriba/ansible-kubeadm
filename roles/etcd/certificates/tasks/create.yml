@@ -2,7 +2,7 @@
 
 - name: "Create etcd ca-config json file on {{ groups['etcd'][0] }}"
   template:
-    src: ../templates/ca-config.json.j2
+    src: ca-config.json.j2
     dest: /etc/etcd/pki/ca-config.json
     owner: root
     group: root
@@ -11,7 +11,7 @@
 
 - name: "Create etcd ca-csr json file on {{ groups['etcd'][0] }}"
   template:
-    src: ../templates/ca-csr.json.j2
+    src: ca-csr.json.j2
     dest: /etc/etcd/pki/ca-csr.json
     owner: root
     group: root
@@ -26,7 +26,7 @@
 
 - name: "Create etcd client json file on {{ groups['etcd'][0] }}"
   template:
-    src: ../templates/client.json.j2
+    src: client.json.j2
     dest: /etc/etcd/pki/client.json
     owner: root
     group: root

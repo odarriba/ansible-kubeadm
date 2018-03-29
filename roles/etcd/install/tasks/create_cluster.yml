@@ -7,7 +7,7 @@
 
 - name: "Create/update etcd.env"
   template:
-    src: ../templates/etcd.env.j2
+    src: etcd.env.j2
     dest: /etc/etcd.env
     owner: root
     group: root
@@ -15,7 +15,7 @@
 
 - name: "Create/update etcd.service"
   template:
-    src: ../templates/etcd.service.j2
+    src: etcd.service.j2
     dest: /etc/systemd/system/etcd.service
     owner: root
     group: root
