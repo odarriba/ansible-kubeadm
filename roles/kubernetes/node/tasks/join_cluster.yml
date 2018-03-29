@@ -1,0 +1,16 @@
+---
+
+- name: Join to Kubernetes cluster in {{ hostvars[groups['kube-controllers'][0]]['ip'] }}
+  when: get_kubeadm_token.rc == 0
+  shell: |
+    kubeadm join --token {{ get_kubeadm_token.stdout }} \
+                 {{ hostvars[groups['kube-controllers'][0]]['ip'] }}:6443
+  register: join_cluster
+
+- name: Enable and restart kubelet engine
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  register: started_kubelet
