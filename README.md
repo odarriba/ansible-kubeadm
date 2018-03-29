@@ -8,6 +8,9 @@ The aim of this ansible package is to provide a way to:
 - Be able to scale both Kubernetes and etcd clusters
 - Be able to recover from partial cluster outages without major issues
 
+Some parts of this playbooks are based on [kubespray](https://github.com/kubernetes-incubator/kubespray)
+and [kubeadm-ansible](https://github.com/kairen/kubeadm-ansible)
+
 ## Requirements
 
 This playbooks are thought to be run on **Debian** machines, and suppose that
@@ -20,6 +23,7 @@ executed require administration rights.
 - Kubeadm (latest versiona vailable on official repos)
 - Kubernetes (version indicated in config vars)
 - Etcd (version indicated in config vars)
+- Flannel as the cluster CNI
 
 ## Playbooks included
 
