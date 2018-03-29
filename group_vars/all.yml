@@ -1,6 +1,5 @@
 # Kubernetes
-kube_version: v1.9.6
-token: b0f7b8.8d1767876297d85c
+kube_version: 1.9.6
 
 # Should etcd certificates be generated if not found in local or in first etcd node
 etcd_generate_certs: true
@@ -15,8 +14,6 @@ kubernetes_generate_certs: true
 # balance the calls to the API servers (only if there are more than one
 # controller)
 use_nginx_loadbalancer: true
-
-# This variables can set which NGiNX image/version to use
 nginx_image_repo: nginx
 nginx_image_tag: 1.13
 
@@ -29,10 +26,8 @@ service_cidr: "{{ service_subnet }}.0/12"
 dns_name: cluster.local
 dns_ip: "{{ service_subnet }}.10"
 
-# Network implementation('flannel', 'calico')
-network: flannel
 pod_network_cidr: 10.244.0.0/16
-cni_opts: "interface=eth1" # flannel: --iface=eth1, calico: interface=eth1
+cni_opts: "interface=eth1"
 
 # A list of insecure registrys you might need to define
 insecure_registrys: ""
