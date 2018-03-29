@@ -23,9 +23,10 @@
     enabled: yes
   register: started_kubelet
 
-- name: test kubectl get nodes
-  shell: KUBECONFIG=/etc/kubernetes/admin.conf kubectl get nodes
+- name: Test kubectl get nodes returns all controllers
+  shell: kubectl get nodes | grep '{{ ansible_hostname }}'
   register: result_get_nodes
-
-- name: test kubectl get nodes result
-  shell: test {{ result_get_nodes.rc}} -eq 0
+  until: result_get_nodes.rc == 0
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+  retries: 5
