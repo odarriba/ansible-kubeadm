@@ -18,17 +18,15 @@ kube-nodes:
       ip: 172.17.8.103
       ansible_user: vagrant
       ansible_become: true
-      node_tags:
-        - tag: agw.kubernetes.io/test
-          value: "true"
+      custom_labels:
+        - agw.kubernetes.io/test="true"
     worker-1:
       ansible_ssh_host: 172.17.8.104
       ip: 172.17.8.104
       ansible_user: vagrant
       ansible_become: true
-      node_tags:
-        - tag: agw.kubernetes.io/test
-          value: "true"
+      custom_labels:
+        - agw.kubernetes.io/test="true"
 
 kube-all:
   children:
