@@ -12,12 +12,14 @@ etcd:
   certFile: /etc/kubernetes/pki/etcd/client.pem
   keyFile: /etc/kubernetes/pki/etcd/client-key.pem
 networking:
+  dnsDomain: {{ dns_name }}
+  serviceSubnet: {{ service_cidr }}
   podSubnet: {{ pod_network_cidr }}
 kubernetesVersion: {{ kube_version }}
 apiServerCertSANs:
 - kubernetes
 - 127.0.0.1
-- cluster.local
+- {{ dns_name }}
 {% for domain in controller_domains -%}
 - {{ domain }}
 {% endfor %}

@@ -24,7 +24,6 @@ kubeadm_opts: ''
 service_subnet: 10.96.0
 service_cidr: "{{ service_subnet }}.0/12"
 dns_name: cluster.local
-dns_ip: "{{ service_subnet }}.10"
 
 pod_network_cidr: 10.244.0.0/16
 cni_opts: "interface=eth1"
