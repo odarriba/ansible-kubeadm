@@ -25,10 +25,10 @@ service_subnet: 10.96.0
 service_cidr: "{{ service_subnet }}.0/12"
 dns_name: cluster.local
 
-# Network implementation('flannel', 'calico')
-network: flannel
+## interface that should be used for flannel operations
+## This is actually an inventory cluster-level item
+# flannel_interface:
 pod_network_cidr: 10.244.0.0/16
-cni_opts: "interface=eth1" # flannel: --iface=eth1, calico: interface=eth1
 
 # A list of insecure registrys you might need to define
 insecure_registrys: ""

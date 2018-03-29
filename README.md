@@ -23,7 +23,7 @@ executed require administration rights.
 - Kubeadm (latest versiona vailable on official repos)
 - Kubernetes (version indicated in config vars)
 - Etcd (version indicated in config vars)
-- Flannel or Calico
+- Flannel as the networking plugin
 
 ## Playbooks included
 
