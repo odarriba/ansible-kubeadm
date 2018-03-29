@@ -9,26 +9,27 @@
   when: docker_installed|failed
 
 - name: Copy Docker engine service file
-  register: change_docker
   template:
     src: "docker.service.j2"
     dest: "{{ systemd_dir }}/docker.service"
     owner: root
     group: root
     mode: 0755
-  when: docker_installed|failed
+  register: docker_copy_service_file
 
 - name: Copy Docker environment config file
   template: src=docker.j2 dest={{ system_env_dir }}/docker
-  when: docker_installed|failed
+  register: docker_copy_env_file
 
 - name: Add any insecure registrys to Docker config
-  when: docker_installed|failed and insecure_registrys is defined and insecure_registrys > 0
+  when: insecure_registrys is defined and insecure_registrys > 0
   lineinfile: dest={{ system_env_dir }}/docker regexp=^INSECURE_REGISTRY= line=INSECURE_REGISTRY="{% for reg in insecure_registrys %}--insecure-registry={{ reg }} {% endfor %}"
+  register: docker_add_insecure_registry
 
 - name: Add registry to Docker config
-  when: docker_installed|failed and add_registry is defined and add_registry > 0
+  when: add_registry is defined and add_registry > 0
   lineinfile: dest={{ system_env_dir }}/docker regexp=^ADD_REGISTRY= line=ADD_REGISTRY="{% for reg in add_registry %}--add-registry={{ reg }} {%endfor %}"
+  register: docker_add_registry
 
 - name: Enable and restart Docker engine
   systemd:
@@ -37,4 +38,4 @@
     state: restarted
     enabled: yes
   register: started_docker
-  when: docker_installed|failed
+  when: docker_installed|failed or docker_copy_service_file|changed or docker_copy_env_file|changed or docker_add_insecure_registry|changed or docker_add_registry|changed
