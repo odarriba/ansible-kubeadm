@@ -1,0 +1,7 @@
+---
+
+- name: Get node token from controller
+  command: kubeadm token create
+  run_once: true
+  delegate_to: "{{ groups['kube-controllers'][0] }}"
+  register: get_kubeadm_token
