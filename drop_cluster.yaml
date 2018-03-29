@@ -1,6 +1,6 @@
 ---
 
-- hosts: kube-cluster
+- hosts: kube-all
   gather_facts: no
   become: yes
   tasks:
