@@ -1,12 +1,22 @@
 ---
 
 - name: Create Kubernetes config directory
-  file: path=/{{ ansible_user_id }}/.kube/ state=directory
+  file:
+    path: ~{{ ansible_user_id }}/.kube/
+    state: directory
 
 - name: Copy config file to HOME/.kube dir
-  command: "{{ item }}"
-  with_items:
-    - mkdir -p ~{{ ansible_user }}/.kube
-    - cp /etc/kubernetes/admin.conf ~{{ ansible_user }}/.kube/config
-    - chown -R {{ ansible_user }}:{{ ansible_user }} ~{{ansible_user }}/.kube
-    - chmod 0400 ~{{ ansible_user }}/.kube/config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: ~{{ ansible_user }}/.kube/config
+    remote_src: true
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0400"
+
+- name: Download kubeconfig file
+  fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: secrets/kubernetes/kubeconfig
+    flat: true
+  run_once: true
