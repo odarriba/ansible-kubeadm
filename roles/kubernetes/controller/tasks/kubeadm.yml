@@ -1,0 +1,31 @@
+---
+
+- name: Create kubeadm-config.json
+  template:
+    src: ../templates/kubeadm-config.json.j2
+    dest: /etc/kubernetes/kubeadm-config.json
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Init Kubernetes cluster
+  shell: |
+    kubeadm init --config=/etc/kubernetes/kubeadm-config.json \
+                 {{ kubeadm_opts }} \
+                 {{ init_opts }}
+  register: init_cluster
+
+- name: Enable and restart kubelet engine
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  register: started_kubelet
+
+- name: test kubectl get nodes
+  shell: KUBECONFIG=/etc/kubernetes/admin.conf kubectl get nodes
+  register: result_get_nodes
+
+- name: test kubectl get nodes result
+  shell: test {{ result_get_nodes.rc}} -eq 0

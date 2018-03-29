@@ -1,0 +1,22 @@
+---
+
+- name: "Create pki directory in all controllers"
+  file:
+    path: /etc/kubernetes/pki/etcd
+    state: directory
+
+- name: Copy Etcd certificates
+  copy:
+    src: secrets/etcd/{{ item.file }}
+    dest: /etc/kubernetes/pki/etcd/{{ item.file }}
+    owner: "root"
+    group: "root"
+    mode: "{{ item.mode }}"
+  with_items:
+  - file: ca.pem
+    mode: "0644"
+  - file: client.pem
+    mode: "0644"
+  - file: client-key.pem
+    mode: "0600"
+

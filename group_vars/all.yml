@@ -12,7 +12,7 @@ etcd_version: v3.3.2
 kubernetes_generate_certs: true
 
 init_opts: ""
-controller_domains: ""
+controller_domains: []
 kubeadm_opts: ''
 
 service_subnet: 10.96.0

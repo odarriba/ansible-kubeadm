@@ -1,23 +1,21 @@
 ---
 
-- name: Set full controller's domain list
-  when:
-    - controller_domains is not defined or controller_domains == ""
-  set_fact:
-    controller_domains_list: "kubernetes"
-
-- name: Set full controller's domain list
-  when:
-    - controller_domains is defined and controller_domains != ""
-  set_fact:
-    controller_domains_list: "kubernetes,{{ controller_domains }}"
-
 - name: PKI infrastructure configuration
   include_tasks: pki/fetch.yml
 
+- name: Reset Kubernetes component
+  shell: "kubeadm reset"
+  register: reset_cluster
+
+- name: Distribute PKI's CAs
+  include_tasks: pki/distribution.yml
+
+- name: Etcd client certificates
+  include_tasks: etcd_certs.yml
+
 - name: Initialise controllers
-  include_tasks: kubeadm/main.yml
+  include_tasks: kubeadm.yml
 
 - name: Create user configuration
-  include_tasks: config/main.yml
+  include_tasks: user_configuration.yml
 
