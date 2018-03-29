@@ -1,48 +1,4 @@
 ---
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: flannel
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - pods
-    verbs:
-      - get
-  - apiGroups:
-      - ""
-    resources:
-      - nodes
-    verbs:
-      - list
-      - watch
-  - apiGroups:
-      - ""
-    resources:
-      - nodes/status
-    verbs:
-      - patch
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: flannel
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: flannel
-subjects:
-- kind: ServiceAccount
-  name: flannel
-  namespace: kube-system
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: flannel
-  namespace: kube-system
----
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -54,61 +10,61 @@ metadata:
 data:
   cni-conf.json: |
     {
-      "name": "cbr0",
-      "type": "flannel",
-      "delegate": {
-        "isDefaultGateway": true
-      }
+      "name":"cni0",
+      "cniVersion":"0.3.1",
+      "plugins":[
+        {
+          "type":"flannel",
+          "delegate":{
+            "forceAddress":true,
+            "hairpinMode": true,
+            "isDefaultGateway":true
+          }
+        },
+        {
+          "type":"portmap",
+          "capabilities":{
+            "portMappings":true
+          }
+        }
+      ]
     }
   net-conf.json: |
     {
-      "Network": "10.244.0.0/16",
+      "Network": "{{ pod_network_cidr }}",
       "Backend": {
-        "Type": "vxlan"
+        "Type": "{{ flannel_backend_type }}"
       }
     }
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: kube-flannel-ds
+  name: kube-flannel
   namespace: kube-system
   labels:
     tier: node
-    app: flannel
+    k8s-app: flannel
 spec:
   template:
     metadata:
       labels:
         tier: node
-        app: flannel
+        k8s-app: flannel
     spec:
-      hostNetwork: true
-      nodeSelector:
-        beta.kubernetes.io/arch: amd64
-      tolerations:
-      - key: node-role.kubernetes.io/master
-        operator: Exists
-        effect: NoSchedule
       serviceAccountName: flannel
-      initContainers:
-      - name: install-cni
-        image: quay.io/coreos/flannel:v0.9.1-amd64
-        command:
-        - cp
-        args:
-        - -f
-        - /etc/kube-flannel/cni-conf.json
-        - /etc/cni/net.d/10-flannel.conf
-        volumeMounts:
-        - name: cni
-          mountPath: /etc/cni/net.d
-        - name: flannel-cfg
-          mountPath: /etc/kube-flannel/
       containers:
       - name: kube-flannel
-        image: quay.io/coreos/flannel:v0.9.1-amd64
-        command: [ "/opt/bin/flanneld", "--ip-masq", "--kube-subnet-mgr" ]
+        image: {{ flannel_image_repo }}:{{ flannel_image_tag }}
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: {{ flannel_cpu_limit }}
+            memory: {{ flannel_memory_limit }}
+          requests:
+            cpu: {{ flannel_cpu_requests }}
+            memory: {{ flannel_memory_requests }}
+        command: [ "/opt/bin/flanneld", "--ip-masq", "--kube-subnet-mgr"{% if flannel_interface is defined %}, "--iface={{ flannel_interface }}"{% endif %} ]
         securityContext:
           privileged: true
         env:
@@ -123,8 +79,32 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run
+        - name: cni
+          mountPath: /etc/cni/net.d
         - name: flannel-cfg
           mountPath: /etc/kube-flannel/
+      - name: install-cni
+        image: {{ flannel_cni_image_repo }}:{{ flannel_cni_image_tag }}
+        command: ["/install-cni.sh"]
+        env:
+        # The CNI network config to install on each node.
+        - name: CNI_NETWORK_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: kube-flannel-cfg
+              key: cni-conf.json
+        - name: CNI_CONF_NAME
+          value: "10-flannel.conflist"
+        volumeMounts:
+        - name: cni
+          mountPath: /host/etc/cni/net.d
+        - name: host-cni-bin
+          mountPath: /host/opt/cni/bin/
+      hostNetwork: true
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
       volumes:
         - name: run
           hostPath:
@@ -135,3 +115,10 @@ spec:
         - name: flannel-cfg
           configMap:
             name: kube-flannel-cfg
+        - name: host-cni-bin
+          hostPath:
+            path: /opt/cni/bin
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: {{ serial | default('20%') }}
+    type: RollingUpdate

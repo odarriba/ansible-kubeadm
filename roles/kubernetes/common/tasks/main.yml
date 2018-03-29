@@ -8,3 +8,13 @@
     insertafter: EOF
     state: present
   with_items: "{{ groups['kube-all'] }}"
+
+- name: Set net.ipv4.ip_forward on all nodes
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+
+- name: Set net.bridge.bridge-nf-call-iptables on all nodes
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1

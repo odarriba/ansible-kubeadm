@@ -1,28 +1,34 @@
 ---
 
-- name: "Set fact {{ network }} cni variable"
-  set_fact:
-    cni: "{{ vars[network] }}"
+- name: Ensure network directory is present
+  file:
+    path: /etc/kubernetes/network
+    state: directory
 
-- name: Create Kubernetes addon directory
-  file: path={{ network_dir }} state=directory
+- name: "Copy flannel yml file"
+  template:
+    src: "flannel.yml.j2"
+    dest: "/etc/kubernetes/network/flannel.yml"
 
-- name: "Copy {{ cni.name }} yml file"
-  template: src="{{ cni.template.ds }}.j2" dest={{ network_dir }}/{{ cni.template.ds }}
+- name: "Copy flannel RBAC yml file"
+  template:
+    src: "flannel-rbac.yml.j2"
+    dest: "/etc/kubernetes/network/flannel-rbac.yml"
 
-- name: "Check {{ cni.name }} daemonset is working"
-  shell: |
-    kubectl --kubeconfig={{ kubeadmin_config }} \
-            get ds --all-namespaces | grep {{ cni.name }}
-  delegate_to: "{{ groups['kube-controllers'][0] }}"
+- name: "Apply flannel RBAC config"
+  command: kubectl apply -f /etc/kubernetes/network/flannel-rbac.yml
   run_once: true
-  register: check_net
-  ignore_errors: true
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
 
-- name: "Create {{ cni.name }} network daemonset"
-  when: check_net|failed
-  shell: |
-    kubectl create --kubeconfig={{ kubeadmin_config }} \
-                   -f {{ network_dir }}/{{ cni.template.ds }}
-  delegate_to: "{{ groups['kube-controllers'][0] }}"
+- name: "Apply flannel DaemonSet config"
+  command: kubectl apply -f /etc/kubernetes/network/flannel.yml
   run_once: true
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: "Wait for flannel subnet.env file presence"
+  wait_for:
+    path: /run/flannel/subnet.env
+    delay: 5
+    timeout: 600

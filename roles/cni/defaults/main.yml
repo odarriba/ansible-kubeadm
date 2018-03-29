@@ -1,10 +1,29 @@
 ---
+# Flannel public IP
+# The address that flannel should advertise as how to access the system
+# Disabled until https://github.com/coreos/flannel/issues/712 is fixed
+# flannel_public_ip: "{{ access_ip|default(ip|default(ansible_default_ipv4.address)) }}"
 
-flannel:
-  name: flannel
-  template:
-    ds: flannel.yml
-calico:
-  name: calico
-  template:
-    ds: calico.yml
+## interface that should be used for flannel operations
+## This is actually an inventory cluster-level item
+# flannel_interface:
+
+# You can choose what type of flannel backend to use
+# please refer to flannel's docs : https://github.com/coreos/flannel/blob/master/README.md
+flannel_backend_type: "vxlan"
+
+# Limits for apps
+flannel_memory_limit: 500M
+flannel_cpu_limit: 300m
+flannel_memory_requests: 64M
+flannel_cpu_requests: 150m
+
+# Versions
+flannel_version: "v0.10.0"
+flannel_cni_version: "v0.3.0"
+
+# Images
+flannel_image_repo: "quay.io/coreos/flannel"
+flannel_image_tag: "{{ flannel_version }}"
+flannel_cni_image_repo: "quay.io/coreos/flannel-cni"
+flannel_cni_image_tag: "{{ flannel_cni_version }}"
