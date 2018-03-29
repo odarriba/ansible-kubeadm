@@ -25,5 +25,3 @@
     mode: "0600"
   - file: sa.key
     mode: "0600"
-
-- include_tasks: update_ca_trust.yml

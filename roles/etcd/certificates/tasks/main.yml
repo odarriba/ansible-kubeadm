@@ -72,5 +72,7 @@
   - file: client-key.pem
     mode: "0600"
 
+- include_tasks: update_ca_trust.yml
+
 - name: "Generate peeer certificates"
   include_tasks: peer_certs.yml
