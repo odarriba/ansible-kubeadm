@@ -2,8 +2,11 @@
 
 - name: Create Kubernetes config directory
   file:
-    path: ~{{ ansible_user_id }}/.kube/
+    path: ~{{ ansible_user }}/.kube/
     state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
 
 - name: Copy config file to HOME/.kube dir
   copy:
