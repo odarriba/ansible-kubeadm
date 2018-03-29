@@ -23,7 +23,7 @@ executed require administration rights.
 - Kubeadm (latest versiona vailable on official repos)
 - Kubernetes (version indicated in config vars)
 - Etcd (version indicated in config vars)
-- Flannel as the cluster CNI
+- Flannel or Calico
 
 ## Playbooks included
 

@@ -3,6 +3,7 @@
   shell: kubectl get nodes | grep '{{ ansible_hostname }}\s*Ready'
   register: node_is_in_cluster
   delegate_to: "{{ groups['kube-controllers'][0] }}"
+  ignore_errors: true
   environment:
     KUBECONFIG: "/etc/kubernetes/admin.conf"
 
