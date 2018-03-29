@@ -1,0 +1,10 @@
+---
+
+- name: "Copy CA to all nodes trust certificates"
+  copy:
+    src: "/etc/etcd/pki/ca.pem"
+    dest: "/usr/local/share/ca-certificates/etcd-ca.crt"
+    remote_src: true
+
+- name: Update ca-certificates
+  command: update-ca-certificates

@@ -1,21 +1,11 @@
 ---
 
+- include_tasks: get_kubeadm_token.yml
+
 - name: Reset Kubernetes component
   shell: "kubeadm reset"
   register: reset_cluster
 
-- name: Join to Kubernetes cluster in {{ hostvars[groups['kube-controllers'][0]]['ip'] }}
-  when: reset_cluster|succeeded
-  shell: |
-    kubeadm join --token {{ token }} \
-                 {{ hostvars[groups['kube-controllers'][0]]['ip'] }}:6443 \
-                 --discovery-token-unsafe-skip-ca-verification
-  register: join_cluster
+- include_tasks: ../../pki/distribution_nodes.yml
 
-- name: Enable and restart kubelet engine
-  systemd:
-    name: kubelet
-    daemon_reload: yes
-    state: restarted
-    enabled: yes
-  register: started_kubelet
+- include_tasks: join_cluster.yml

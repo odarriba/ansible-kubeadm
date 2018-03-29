@@ -1,14 +1,14 @@
 ---
 
 - name: PKI infrastructure configuration
-  include_tasks: pki/fetch.yml
+  include_tasks: ../../pki/fetch.yml
 
 - name: Reset Kubernetes component
   shell: "kubeadm reset"
   register: reset_cluster
 
 - name: Distribute PKI's CAs
-  include_tasks: pki/distribution.yml
+  include_tasks: ../../pki/distribution_controllers.yml
 
 - name: Etcd client certificates
   include_tasks: etcd_certs.yml
