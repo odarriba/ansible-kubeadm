@@ -2,12 +2,7 @@
 
 - include_tasks: get_kubeadm_credentials.yml
 
-- name: Reset Kubernetes component
-  shell: "kubeadm reset"
-  register: reset_cluster
-
 - include_tasks: join_cluster.yml
-  serial: 1
 
 - name: Test kubectl get nodes returns all nodes
   shell: kubectl get nodes | grep '{{ ansible_hostname }}'
