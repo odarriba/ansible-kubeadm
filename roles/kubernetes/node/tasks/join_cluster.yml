@@ -1,14 +1,26 @@
 ---
+- name: Test if node is already in the cluster
+  shell: kubectl get nodes | grep '{{ ansible_hostname }}\s*Ready'
+  register: node_is_in_cluster
+  delegate_to: "{{ groups['kube-controllers'][0] }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Reset Kubernetes component
+  when: get_kubeadm_token.rc == 0 and get_kubeadm_ca_hash.rc == 0 and node_is_in_cluster.rc != 0
+  shell: "kubeadm reset"
+  register: reset_cluster
 
 - name: Join to Kubernetes cluster in {{ groups['kube-controllers'][0] }}
-  when: get_kubeadm_token.rc == 0 and get_kubeadm_ca_hash.rc == 0
+  when: get_kubeadm_token.rc == 0 and get_kubeadm_ca_hash.rc == 0 and node_is_in_cluster.rc != 0
   shell: |
     kubeadm join --token {{ get_kubeadm_token.stdout }} \
                  --discovery-token-ca-cert-hash sha256:{{ get_kubeadm_ca_hash.stdout }} \
-                 {{ hostvars[groups['kube-controllers'][0]]['ip'] }}:443
+                 {{ hostvars[groups['kube-controllers'][0]]['ip'] }}:6443
   register: join_cluster
 
 - name: Enable and restart kubelet engine
+  when: node_is_in_cluster != 0
   systemd:
     name: kubelet
     daemon_reload: yes
