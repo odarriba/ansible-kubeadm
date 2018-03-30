@@ -1,0 +1,15 @@
+---
+
+- hosts: kube-all
+  gather_facts: yes
+  become: yes
+  roles:
+    - { role: docker, tags: docker }
+    - { role: kubernetes/common, tags: common }
+
+- hosts: kube-nodes
+  gather_facts: yes
+  become: yes
+  roles:
+    - { role: kubernetes/node, tags: node }
+

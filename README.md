@@ -36,6 +36,10 @@ having the Etcd cluster running and it's secrets on the `secrets` folder.
 
 * **etcd.yml**: it just spawns the Etcd cluster and copies the secrets to local.
 
+* **scale_cluster.yml**: Scalates the cluster by running nodes-only roles. To
+use it you just need to add the new nodes to `kube-nodes` group and run this
+playbook.
+
 * **drop_cluster.yml**: Delete Kubernetes cluster from all nodes.
 
 ## Secrets
@@ -77,8 +81,8 @@ Some extra documentation:
 
 ## TODO
 
-- Scale nodes playbook
 - Delete a node playbook
+- Upgrade cluster playbook
 
 ## License
 
