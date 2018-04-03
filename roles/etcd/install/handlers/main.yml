@@ -6,8 +6,6 @@
     - reload etcd
     - wait for etcd up
 
-- import_tasks: backup.yml
-
 - name: etcd | reload systemd
   command: systemctl daemon-reload
 
