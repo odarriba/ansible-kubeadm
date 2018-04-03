@@ -9,8 +9,6 @@
         https://{{ hostvars[item]['ip'] }}:2379{% if not loop.last %},{% endif %}
       {%- endfor %}
 
-- include_tasks: backup.yml
-
 - include_tasks: install.yml
 
 - name: Join member(s) to etcd cluster one at a time

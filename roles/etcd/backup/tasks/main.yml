@@ -1,14 +1,14 @@
 ---
 
-- include_tasks: set_cluster_health.yml
-
 - name: "Set ectd cluster addresses"
   set_fact:
     etcd_access_urls: |-
       {% for item in groups['etcd'] -%}
         https://{{ hostvars[item]['ip'] }}:2379{% if not loop.last %},{% endif %}
       {%- endfor %}
-  when: etcd_access_urls is not defined and etcd_cluster_is_healthy.rc == 0
+  when: etcd_access_urls is not defined
+
+- include_tasks: set_cluster_health.yml
 
 - name: Refresh Time Fact
   setup: filter=ansible_date_time

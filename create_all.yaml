@@ -12,6 +12,7 @@
   become: yes
   roles:
     - { role: etcd/common, tags: etcd_common }
+    - { role: etcd/backup, tags: etcd_backup }
     - { role: etcd/certificates, tags: etcd_certificates }
     - { role: etcd/install, tags: etcd_install }
 
