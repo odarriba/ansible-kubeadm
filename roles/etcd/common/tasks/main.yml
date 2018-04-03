@@ -8,7 +8,7 @@
     url:  https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
     dest: /usr/local/bin/cfssl
     mode: 0755
-  when: cfssl_installed|failed
+  when: cfssl_installed is failed
 
 - name: "Check if cfssljson is installed on etcd nodes"
   command: which cfssljson
@@ -20,7 +20,7 @@
     url:  https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
     dest: /usr/local/bin/cfssljson
     mode: 0755
-  when: cfssljson_installed|failed
+  when: cfssljson_installed is failed
 
 - name: Add entries to hosts files
   lineinfile:

@@ -26,16 +26,16 @@
    - client-key.pem
   run_once: true
   ignore_errors: true
-  when: etcd_certs_exist|failed
+  when: etcd_certs_exist is failed
   register: etcd_certs_fetched
 
 - name: "Fail if no certificate is found and generation is disabled"
   fail:
     msg: "Etcd certificates not found and etcd_generate_certs=false on the configuration!"
-  when: etcd_certs_fetched|failed and etcd_certs_exist|failed and (etcd_generate_certs == false or etcd_generate_certs is not defined)
+  when: etcd_certs_fetched is failed and etcd_certs_exist is failed and (etcd_generate_certs == false or etcd_generate_certs is not defined)
 
 - name: "Generate etcd certificates on {{ groups['etcd'][0] }}"
-  when: etcd_certs_fetched|failed and etcd_certs_exist|failed
+  when: etcd_certs_fetched is failed and etcd_certs_exist is failed
   include_tasks: create.yml
 
 - name: "Fetch generated certificates from {{ groups['etcd'][0] }}"
@@ -51,7 +51,7 @@
    - client.pem
    - client-key.pem
   run_once: true
-  when: etcd_certs_fetched|failed and etcd_certs_exist|failed
+  when: etcd_certs_fetched is failed and etcd_certs_exist is failed
 
 - name: "Distribute certificates to all etcd nodes"
   copy:

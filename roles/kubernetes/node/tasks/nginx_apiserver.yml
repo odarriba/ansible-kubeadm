@@ -22,7 +22,7 @@
 
 - name: Restart all nginx proxies to fetch updated configuration
   command: kubectl delete pod -n kube-system -l k8s-app=kube-nginx-apiserver
-  when: write_nginx_config|changed
+  when: write_nginx_config is changed
   run_once: true
   delegate_to: "{{ groups['kube-controllers'][0] }}"
   environment:
@@ -67,7 +67,7 @@
 
 - name: Apply updated kube-proxy config map
   command: kubectl apply -f /tmp/kube-proxy-cm.yaml --force
-  when: update_kube_proxy_config|changed
+  when: update_kube_proxy_config is changed
   run_once: true
   delegate_to: "{{ groups['kube-controllers'][0] }}"
   environment:
@@ -75,7 +75,7 @@
 
 - name: Restart kube-proxy pods
   command: kubectl delete pod -n kube-system -l k8s-app=kube-proxy
-  when: update_kube_proxy_config|changed
+  when: update_kube_proxy_config is changed
   run_once: true
   delegate_to: "{{ groups['kube-controllers'][0] }}"
   environment:

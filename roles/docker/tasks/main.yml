@@ -6,7 +6,7 @@
 
 - name: Install Docker container engine
   include_tasks: pkg.yml
-  when: docker_installed|failed
+  when: docker_installed is failed
 
 - name: Copy Docker engine service file
   template:
@@ -38,4 +38,4 @@
     state: restarted
     enabled: yes
   register: started_docker
-  when: docker_installed|failed or docker_copy_service_file|changed or docker_copy_env_file|changed or docker_add_insecure_registry|changed or docker_add_registry|changed
+  when: docker_installed is failed or docker_copy_service_file is changed or docker_copy_env_file is changed or docker_add_insecure_registry is changed or docker_add_registry is changed

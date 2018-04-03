@@ -21,7 +21,7 @@
     dest: "{{ local_kubernetes_secrets_dir }}/pki/{{ item }}"
     flat: yes
     fail_on_missing: true
-  when: kubernetes_certs_exist|failed
+  when: kubernetes_certs_exist is failed
   with_items:
    - ca.crt
    - ca.key
@@ -36,11 +36,11 @@
 - name: "Fail if no certificates are found and generation is disabled"
   fail:
     msg: "Certificates not found and kubernetes_generate_certs=false on the configuration!"
-  when: kubernetes_certs_fetched|failed and kubernetes_certs_exist|failed and (kubernetes_generate_certs == false or kubernetes_generate_certs is not defined)
+  when: kubernetes_certs_fetched is failed and kubernetes_certs_exist is failed and (kubernetes_generate_certs == false or kubernetes_generate_certs is not defined)
 
 - name: "Generate certificates on {{ groups['kube-controllers'][0] }}"
   command: kubeadm alpha phase certs all
-  when: kubernetes_certs_fetched|failed and kubernetes_certs_exist|failed
+  when: kubernetes_certs_fetched is failed and kubernetes_certs_exist is failed
   run_once: true
 
 - name: "Fetch generated certificates from {{ groups['kube-controllers'][0] }}"
@@ -49,7 +49,7 @@
     dest: "{{ local_kubernetes_secrets_dir }}/pki/{{ item }}"
     flat: yes
     fail_on_missing: true
-  when: kubernetes_certs_fetched|failed and kubernetes_certs_exist|failed
+  when: kubernetes_certs_fetched is failed and kubernetes_certs_exist is failed
   with_items:
    - ca.crt
    - ca.key
