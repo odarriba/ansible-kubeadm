@@ -1,0 +1,54 @@
+---
+
+- include_tasks: set_cluster_health.yml
+
+- name: "Set ectd cluster addresses"
+  set_fact:
+    etcd_access_urls: |-
+      {% for item in groups['etcd'] -%}
+        https://{{ hostvars[item]['ip'] }}:2379{% if not loop.last %},{% endif %}
+      {%- endfor %}
+  when: etcd_access_urls is not defined and etcd_cluster_is_healthy.rc == 0
+
+- name: Refresh Time Fact
+  setup: filter=ansible_date_time
+  when: etcd_cluster_is_healthy.rc == 0
+
+- name: Set Backup Directory
+  set_fact:
+    etcd_backup_directory: "/var/lib/etcd/backup/etcd-{{ ansible_date_time.date }}_{{ ansible_date_time.time }}"
+  when: etcd_cluster_is_healthy.rc == 0
+
+- name: Create Backup Directory
+  file:
+    path: "{{ etcd_backup_directory }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0600
+  when: etcd_cluster_is_healthy.rc == 0
+
+- name: Stat etcd v2 data directory
+  stat:
+    path: "/var/lib/etcd/member"
+  register: etcd_data_dir_member
+  when: etcd_cluster_is_healthy.rc == 0
+
+- name: Backup etcd v2 data
+  when: etcd_cluster_is_healthy.rc == 0 and etcd_data_dir_member.stat.exists
+  command:  etcdctl backup --data-dir /var/lib/etcd --backup-dir {{ etcd_backup_directory }}
+  environment:
+    ETCDCTL_API: 2
+  retries: 3
+  delay: 3
+
+- name: Backup etcd v3 data
+  command: etcdctl snapshot save {{ etcd_backup_directory }}/snapshot.db
+  environment:
+    ETCDCTL_API: 3
+    ETCDCTL_ENDPOINTS: "{{ etcd_access_url }}"
+    ETCDCTL_CERT: "/etc/etcd/pki/client.pem"
+    ETCDCTL_KEY: "/etc/etcd/pki/client-key.pem"
+  retries: 3
+  delay: 3
+  when: etcd_cluster_is_healthy.rc == 0

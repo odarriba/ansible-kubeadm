@@ -1,8 +1,14 @@
 ---
 
+- name: Test if correct version of etcd is installed
+  shell: "etcd --version | grep '{{ etcd_version }}'"
+  register: etcd_installed
+  ignore_errors: True
+
 - name: Install etcd
   unarchive:
-    src: https://github.com/coreos/etcd/releases/download/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-amd64.tar.gz
+    src: https://github.com/coreos/etcd/releases/download/v{{ etcd_version }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz
     dest: /usr/local/bin
     extra_opts: [--strip-components=1]
     remote_src: yes
+  when: etcd_installed.rc != 0
