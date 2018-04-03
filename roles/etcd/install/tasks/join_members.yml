@@ -8,7 +8,6 @@
   check_mode: no
   environment:
     ETCDCTL_ENDPOINTS: "{{ etcd_access_urls }}"
-    ETCDCTL_CA_FILE: "/etc/etcd/pki/ca.pem"
     ETCDCTL_CERT_FILE: "/etc/etcd/pki/client.pem"
     ETCDCTL_KEY_FILE: "/etc/etcd/pki/client-key.pem"
 
@@ -52,7 +51,6 @@
   retries: 4
   environment:
     ETCDCTL_ENDPOINTS: "{{ etcd_access_urls }}"
-    ETCDCTL_CA_FILE: "/etc/etcd/pki/ca.pem"
     ETCDCTL_CERT_FILE: "/etc/etcd/pki/client.pem"
     ETCDCTL_KEY_FILE: "/etc/etcd/pki/client-key.pem"
 
@@ -75,6 +73,5 @@
   check_mode: no
   environment:
     ETCDCTL_ENDPOINTS: "{{ etcd_access_urls }}"
-    ETCDCTL_CA_FILE: "/etc/etcd/pki/ca.pem"
     ETCDCTL_CERT_FILE: "/etc/etcd/pki/client.pem"
     ETCDCTL_KEY_FILE: "/etc/etcd/pki/client-key.pem"

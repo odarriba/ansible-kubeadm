@@ -5,7 +5,7 @@ kube_version: 1.9.6
 etcd_generate_certs: true
 
 # Etcd version to install
-etcd_version: v3.3.2
+etcd_version: 3.3.2
 
 # Should kubernetes certificates be generated if not found in local or in first controller
 kubernetes_generate_certs: true

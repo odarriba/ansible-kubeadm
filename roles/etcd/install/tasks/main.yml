@@ -9,9 +9,9 @@
         https://{{ hostvars[item]['ip'] }}:2379{% if not loop.last %},{% endif %}
       {%- endfor %}
 
-- include_tasks: install.yml
+- include_tasks: backup.yml
 
-- include_tasks: set_cluster_health.yml
+- include_tasks: install.yml
 
 - name: Join member(s) to etcd cluster one at a time
   include_tasks: join_members.yml
@@ -34,7 +34,6 @@
   retries: 4
   environment:
     ETCDCTL_ENDPOINTS: "{{ etcd_access_url }}"
-    ETCDCTL_CA_FILE: "/etc/etcd/pki/ca.pem"
     ETCDCTL_CERT_FILE: "/etc/etcd/pki/client.pem"
     ETCDCTL_KEY_FILE: "/etc/etcd/pki/client-key.pem"
 
