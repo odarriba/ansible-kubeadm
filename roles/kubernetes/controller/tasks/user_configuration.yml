@@ -20,6 +20,6 @@
 - name: Download kubeconfig file
   fetch:
     src: /etc/kubernetes/admin.conf
-    dest: secrets/kubernetes/kubeconfig
+    dest: "{{ local_kubernetes_secrets_dir }}/kubeconfig"
     flat: true
   run_once: true

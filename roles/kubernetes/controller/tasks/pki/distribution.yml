@@ -7,7 +7,7 @@
 
 - name: "Copy generated certificates to all controllers"
   copy:
-    src: "secrets/kubernetes/pki/{{ item.file }}"
+    src: "{{ local_kubernetes_secrets_dir }}/pki/{{ item.file }}"
     dest: "/etc/kubernetes/pki/{{ item.file }}"
     owner: "root"
     group: "root"

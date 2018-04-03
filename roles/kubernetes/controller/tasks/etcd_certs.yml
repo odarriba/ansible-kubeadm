@@ -7,7 +7,7 @@
 
 - name: Copy Etcd certificates
   copy:
-    src: secrets/etcd/{{ item.file }}
+    src: "{{ local_etcd_secrets_dir }}/{{ item.file }}"
     dest: /etc/kubernetes/pki/etcd/{{ item.file }}
     owner: "root"
     group: "root"

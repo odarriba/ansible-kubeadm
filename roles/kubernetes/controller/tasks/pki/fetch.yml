@@ -1,7 +1,7 @@
 ---
 
 - name: Check if local certificates exist
-  command: test -f secrets/kubernetes/pki/"{{ item }}"
+  command: test -f {{ local_kubernetes_secrets_dir }}/pki/"{{ item }}"
   with_items:
    - ca.crt
    - ca.key
@@ -18,7 +18,7 @@
 - name: "Trying to fetch certificates from {{ groups['kube-controllers'][0] }}"
   fetch:
     src: /etc/kubernetes/pki/{{ item }}
-    dest: secrets/kubernetes/pki/{{ item }}
+    dest: "{{ local_kubernetes_secrets_dir }}/pki/{{ item }}"
     flat: yes
     fail_on_missing: true
   when: kubernetes_certs_exist|failed
@@ -46,7 +46,7 @@
 - name: "Fetch generated certificates from {{ groups['kube-controllers'][0] }}"
   fetch:
     src: /etc/kubernetes/pki/{{ item }}
-    dest: secrets/kubernetes/pki/{{ item }}
+    dest: "{{ local_kubernetes_secrets_dir }}/pki/{{ item }}"
     flat: yes
     fail_on_missing: true
   when: kubernetes_certs_fetched|failed and kubernetes_certs_exist|failed

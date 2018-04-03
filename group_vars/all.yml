@@ -1,3 +1,7 @@
+# Local secrets directory
+local_etcd_secrets_dir: "{{ inventory_dir }}/secrets/etcd"
+local_kubernetes_secrets_dir: "{{ inventory_dir }}/secrets/kubernetes"
+
 # Kubernetes
 kube_version: 1.9.6
 
