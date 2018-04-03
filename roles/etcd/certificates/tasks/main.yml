@@ -1,5 +1,8 @@
+- set_fact:
+    local_certs_dir: "{{ inventory_dir }}/secrets/etcd"
+
 - name: "Check if local certificates exist"
-  command: test -f secrets/etcd/"{{ item }}"
+  command: test -f "{{ local_certs_dir }}"/"{{ item }}"
   with_items:
    - ca.pem
    - ca-config.json
@@ -15,7 +18,7 @@
 - name: "Trying to fetch certificates from {{ groups['etcd'][0] }}"
   fetch:
     src: /etc/etcd/pki/{{ item }}
-    dest: secrets/etcd/{{ item }}
+    dest: "{{ local_certs_dir }}/{{ item }}"
     flat: yes
     fail_on_missing: true
   with_items:
@@ -41,7 +44,7 @@
 - name: "Fetch generated certificates from {{ groups['etcd'][0] }}"
   fetch:
     src: /etc/etcd/pki/{{ item }}
-    dest: secrets/etcd/{{ item }}
+    dest: "{{ local_certs_dir }}/{{ item }}"
     flat: yes
     fail_on_missing: true
   with_items:
@@ -56,7 +59,7 @@
 - name: "Distribute certificates to all etcd nodes"
   copy:
     dest: /etc/etcd/pki/{{ item.file }}
-    src: secrets/etcd/{{ item.file }}
+    src: "{{ local_certs_dir }}/{{ item.file }}"
     owner: "root"
     group: "root"
     mode: "{{ item.mode }}"
