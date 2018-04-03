@@ -36,6 +36,8 @@ having the Etcd cluster running and it's secrets on the `secrets` folder.
 
 * **etcd.yml**: it just spawns the Etcd cluster and copies the secrets to local.
 
+* **etcd_backup.yml**: creates a backup of the Etcd data on each server of the cluster.
+
 * **scale_cluster.yml**: Scalates the cluster by running nodes-only roles. To
 use it you just need to add the new nodes to `kube-nodes` group and run this
 playbook.
