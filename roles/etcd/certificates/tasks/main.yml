@@ -6,7 +6,7 @@
    - ca-key.pem
    - client.pem
    - client-key.pem
-  become: false
+  become: no
   run_once: true
   ignore_errors: true
   delegate_to: localhost
