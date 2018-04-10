@@ -9,7 +9,7 @@
    - front-proxy-ca.key
    - sa.pub
    - sa.key
-  become: false
+  become: no
   run_once: true
   ignore_errors: true
   delegate_to: localhost
