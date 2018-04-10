@@ -19,3 +19,10 @@
     name: "{{ item }}"
     update_cache: yes
   with_items: "{{ pkgs }}"
+
+- name: Lock locked packages
+  when: ansible_os_family == "Debian"
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items: "{{ locked_pkgs }}"
