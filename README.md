@@ -60,7 +60,7 @@ Those secrets **should never** be commited to this repository.
 
 In case of loosing them, the playbooks try to fetch them from the first host
 of each group (`kube-controllers` and `etcd`) in order to avoid regenerating
-the whole KPI, which can lead to a (short) outage time.
+the whole PKI, which can lead to a (short) outage time.
 
 ## High Availability
 
